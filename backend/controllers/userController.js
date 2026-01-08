@@ -1,4 +1,5 @@
 import { User } from "../models/userModel.js";
+import { Session } from "../models/sessionModel.js";
 import bcrypt from "bcryptjs";
 import { verifyMail } from "../emailVerify/verifyMail.js";
 import jwt from "jsonwebtoken"
@@ -85,6 +86,90 @@ export const verification = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Email verified successfully"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+export const loginUser = async (req, res) =>{
+    try {
+        const { email, password} = req.body;
+        if(!email || !password){
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            })
+        }
+        //find user is available or not in a database
+        const user = await User.findOne({email})
+        if(!user){
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized access"
+            })
+        }
+        const passwordCheck = await bcrypt.compare(password, user.password)
+        if(!passwordCheck){
+            return res.status(401).json({
+                success: false,
+                message: "incorrect password"
+            })
+        }
+        // check if user is verified or not
+        if(!user.isVerified){
+            return res.status(403).json({
+                success: false,
+                message: "Please verify your email before login"
+            })
+        }
+
+        // check for existing session and delete it
+        const existingSession = await Session.findOne({ userId: user._id})
+        if(existingSession){
+            await Session.deleteOne({ userId: user._id});
+        }
+
+        //create a new session
+        await Session.create({
+             userId: user._id
+        })
+
+        // generate tokens
+        const accessToken = jwt.sign({id:user._id}, process.env.SECRET_KEY, { expiresIn: '10d'})
+        const refreshToken = jwt.sign({id:user._id}, process.env.SECRET_KEY, { expiresIn: '30d'})
+
+        user.isLoggedIn = true;
+        await user.save()
+
+        return res.status(200).json({
+            success: true,
+            message: `${user.username} Loged in  successfully`,
+            data: {
+                user,
+                accessToken,
+                refreshToken
+            }
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+export const logoutUser = async (req, res) =>{
+    try {
+         const userId = req.userId;
+        await Session.deleteMany({ userId });
+        await User.findByIdAndUpdate(userId, { isLoggedIn: false })
+        return res.status(200).json({
+            success: true,
+            message: "Logged out successfully"
         })
     } catch (error) {
         return res.status(500).json({
