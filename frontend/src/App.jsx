@@ -1,8 +1,39 @@
 import React from 'react'
+import {createBrowserRouter, RouterProvider } from 'react-router-dom'
+import Home from './pages/Home.jsx'
+import Login from './pages/Login.jsx'
+import Signup from './pages/Signup.jsx'
+import Verify from './pages/Verify.jsx'
+import VerifyEmail from "./pages/VerifyEmail.jsx"
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Home />
+  },
+  {
+    path: '/signup',
+    element: <Signup />
+  },
+  {
+    path: '/verify',
+    element: <VerifyEmail />
+  },
+  {
+    path: '/verify/:token',
+    element: <Verify />
+  },
+  {
+    path: '/login',
+    element: <Login />
+  }
+])
 
 const App = () => {
   return (
-    <div className='text-red-400'>Yogesh Saini</div>
+    <div>
+      <RouterProvider router={router} />
+    </div>
   )
 }
 
