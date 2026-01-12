@@ -15,10 +15,10 @@ import { toast } from 'sonner'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { getData } from '../context/userContext.jsx'
-//import Google from "../assets/googleLogo.png"
+import Google from "../assets/googleLogo.png"
 
 const Login = () => {
-    const {setUser} = getData()
+    const { setUser } = getData()
     const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
