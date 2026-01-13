@@ -5,11 +5,12 @@ import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Verify from './pages/Verify.jsx'
 import VerifyEmail from "./pages/VerifyEmail.jsx"
+import Navbar from './components/Navbar.jsx'
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />
+    element: <><Navbar/><Home/></>
   },
   {
     path: '/signup',
